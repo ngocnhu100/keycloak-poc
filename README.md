@@ -169,6 +169,90 @@ npm run dev
 
 ---
 
+## 🔄 Keycloak Backup & Restore
+
+To backup and restore Keycloak realm configuration (including users, roles, clients, etc.) without needing database backup, use the realm export/import feature. The `inventory-management-realm.json` file in this directory contains the complete realm configuration.
+
+### Export Realm Configuration
+
+#### Option 1: Via Keycloak CLI (Recommended - Includes Users & Passwords)
+
+```powershell
+# Export realm using Keycloak CLI
+docker exec keycloak /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/export --realm inventory-management --users realm_file
+
+# Copy exported file to host
+docker cp keycloak:/opt/keycloak/data/export/inventory-management-realm.json ./inventory-management-realm.json
+
+# Verify export (check number of users)
+$json = Get-Content inventory-management-realm.json | ConvertFrom-Json
+Write-Host "Total users exported: $($json.users.Count)"
+$json.users | Select-Object username, email | Format-Table
+```
+
+**Expected output:**
+
+```
+Total users exported: 5
+
+username firstName LastName email
+-------- --------- -------- -----
+admin1   Admin     User     admin1@ims.local
+jdoe     John      Doe      jdoe@ims.local
+qc1      QC        Inspector qc1@ims.local
+prod1    Production Staff    prod1@ims.local
+viewer1  View      Only     viewer1@ims.local
+```
+
+#### Option 2: Via Keycloak Admin Console
+
+1. Access Keycloak Admin Console at http://localhost:8080/admin
+2. Login with admin credentials
+3. Select the `inventory-management` realm
+4. Go to **Realm settings** → **Action** → **Partial export**
+5. Toggle **ON**: **Include groups and roles** and **Include clients**
+6. Click **Export**
+
+**Note:** This method may not export user passwords, only configuration.
+
+### Restore Realm Configuration
+
+#### Option 1: Via Keycloak Admin Console
+
+1. Access Keycloak Admin Console at http://localhost:8080/admin
+2. Login with admin credentials
+3. Click **Create realm**
+4. Select **Browse** and upload `inventory-management-realm.json`
+5. Click **Create**
+
+#### Option 2: Via REST API
+
+```powershell
+# Get access token
+$tokenResponse = Invoke-WebRequest -Uri "http://localhost:8080/realms/master/protocol/openid-connect/token" `
+  -Method POST `
+  -ContentType "application/x-www-form-urlencoded" `
+  -UseBasicParsing `
+  -Body @{
+    grant_type = "password"
+    client_id = "admin-cli"
+    username = "admin"
+    password = "admin"
+  }
+$token = ($tokenResponse.Content | ConvertFrom-Json).access_token
+
+# Then import
+Invoke-WebRequest -Uri "http://localhost:8080/admin/realms" `
+  -Method POST `
+  -Headers @{ "Authorization" = "Bearer $token"; "Content-Type" = "application/json" } `
+  -UseBasicParsing `
+  -InFile "inventory-management-realm.json"
+```
+
+**Note:** This method recreates the realm from scratch with all users, roles, and clients. No database backup is required for configuration-only restore.
+
+---
+
 ## 🧪 Testing the POC
 
 ### Test Case 1: Login as Inventory Manager
