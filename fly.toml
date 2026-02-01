@@ -1,0 +1,33 @@
+app = "ims-keycloak-production"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile.keycloak"
+
+[env]
+  KC_HEALTH_ENABLED = "true"
+  KC_METRICS_ENABLED = "true"
+  KC_HTTP_ENABLED = "true"
+  KC_HOSTNAME_STRICT_HTTPS = "false"
+  KC_PROXY = "edge"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "30s"
+    interval = "15s"
+    method = "get"
+    path = "/health/ready"
+    protocol = "http"
+    timeout = "10s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512

@@ -1,0 +1,12 @@
+FROM quay.io/keycloak/keycloak:24.0
+
+# Copy realm configuration
+COPY inventory-management-realm.json /opt/keycloak/data/import/
+
+# Set import mode
+ENV KC_DB=postgres
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+
+# Import realm on startup (only if not exists)
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start", "--import-realm"]
