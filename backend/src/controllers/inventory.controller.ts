@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { InventoryLot } from "../models/InventoryLot";
+import { InventoryTransaction } from "../models/InventoryTransaction";
 import { Material } from "../models/Material";
 import Joi from "joi";
+import sequelize from "../config/database";
 
 /**
  * Validation schema for creating inventory lot
@@ -126,6 +128,14 @@ export const createLot = async (req: Request, res: Response) => {
       notes,
     } = value;
 
+    const performedBy = req.user?.id;
+    if (!performedBy) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "Missing user identity in token",
+      });
+    }
+
     // Check if material exists
     const material = await Material.findByPk(material_id);
     if (!material) {
@@ -140,20 +150,36 @@ export const createLot = async (req: Request, res: Response) => {
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const lot_number = `LOT-${today}-${randomSuffix}`;
 
-    // Create lot in database
-    const newLot = await InventoryLot.create({
-      lot_number,
-      material_id,
-      quantity_received,
-      quantity_available: quantity_received, // Initially same as received
-      lot_status: "Quarantine", // Default status
-      supplier,
-      manufacturer_lot,
-      expiry_date,
-      storage_location,
-      notes,
-      created_by: req.user?.username,
-      received_date: new Date(),
+    // Create lot + receipt transaction in a single DB transaction
+    await sequelize.transaction(async (t) => {
+      await InventoryLot.create(
+        {
+          lot_number,
+          material_id,
+          quantity_received,
+          quantity_available: quantity_received, // Initially same as received
+          lot_status: "Quarantine", // Default status
+          supplier,
+          manufacturer_lot,
+          expiry_date,
+          storage_location,
+          notes,
+          created_by: req.user?.username,
+          received_date: new Date(),
+        },
+        { transaction: t },
+      );
+
+      await InventoryTransaction.create(
+        {
+          lot_number,
+          transaction_type: "Receipt",
+          quantity: quantity_received,
+          performed_by: performedBy,
+          reason: "Lot received",
+        },
+        { transaction: t },
+      );
     });
 
     // Fetch complete lot with material details

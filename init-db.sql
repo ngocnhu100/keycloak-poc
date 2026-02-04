@@ -103,23 +103,37 @@ VALUES
 ON CONFLICT (lot_number) DO NOTHING;
 
 -- -----------------------------------------------------------------------------
+-- Table: Users (Keycloak user snapshot for joins)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "Users" (
+    user_id VARCHAR(36) PRIMARY KEY, -- Keycloak sub
+    username VARCHAR(100) NOT NULL,
+    email VARCHAR(200),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_username ON "Users"(username);
+
+-- -----------------------------------------------------------------------------
 -- Table: InventoryTransactions (Audit Trail)
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS "InventoryTransactions" (
     transaction_id SERIAL PRIMARY KEY,
     lot_number VARCHAR(20) NOT NULL REFERENCES "InventoryLots"(lot_number),
     transaction_type VARCHAR(20) NOT NULL CHECK (
-        transaction_type IN ('Receive', 'Dispense', 'Adjust', 'Return', 'Waste')
+        transaction_type IN ('Receipt', 'Dispense', 'Adjust', 'Return', 'Waste')
     ),
     quantity DECIMAL(10, 3) NOT NULL,
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    performed_by VARCHAR(50) NOT NULL,
+    performed_by VARCHAR(36) NOT NULL REFERENCES "Users"(user_id),
     reason VARCHAR(200),
     reference_document VARCHAR(50)
 );
 
 CREATE INDEX idx_transactions_lot ON "InventoryTransactions"(lot_number);
 CREATE INDEX idx_transactions_date ON "InventoryTransactions"(transaction_date);
+CREATE INDEX idx_transactions_performed_by ON "InventoryTransactions"(performed_by);
 
 -- -----------------------------------------------------------------------------
 -- Table: QCTests (Quality Control)
@@ -177,5 +191,5 @@ CREATE INDEX idx_batch_components_lot ON "BatchComponents"(lot_number);
 -- -----------------------------------------------------------------------------
 \echo '✅ Database initialization completed successfully!'
 \echo '📊 Created databases: keycloak_db, inventory_db'
-\echo '📋 Created tables: Materials, InventoryLots, InventoryTransactions, QCTests, ProductionBatches, BatchComponents'
+\echo '📋 Created tables: Users, Materials, InventoryLots, InventoryTransactions, QCTests, ProductionBatches, BatchComponents'
 \echo '🔑 Sample data inserted'

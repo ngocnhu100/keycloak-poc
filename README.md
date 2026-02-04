@@ -325,7 +325,7 @@ SELECT * FROM "InventoryLots" ORDER BY received_date DESC LIMIT 1;
     └── package.json
 ```
 
-For complete technical documentation, see [06_Proof of Concept.md](../../01_Documents/06_Proof%20of%20Concept.md)
+For complete technical documentation, see [06_Proof of Concept.md](./06_Proof%20of%20Concept.md)
 
 ---
 

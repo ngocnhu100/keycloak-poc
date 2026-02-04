@@ -89,7 +89,7 @@ const ReceivingForm: React.FC = () => {
       });
 
       message.success(
-        `✅ Lot created successfully: ${response.data.data.lot_number}`,
+        `Lot created successfully: ${response.data.data.lot_number}`,
       );
       form.resetFields();
     } catch (error: any) {

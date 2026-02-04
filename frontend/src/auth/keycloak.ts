@@ -5,7 +5,7 @@ import Keycloak from "keycloak-js";
  * This connects to the Keycloak server and uses the inventory-frontend client
  */
 const keycloak = new Keycloak({
-  url: process.env.VITE_KEYCLOAK_URL || "http://localhost:8080",
+  url: import.meta.env.VITE_KEYCLOAK_URL || "http://localhost:8080",
   realm: "inventory-management",
   clientId: "inventory-frontend",
 });
