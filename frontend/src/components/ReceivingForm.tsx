@@ -9,12 +9,15 @@ import {
   Card,
   Select,
   Typography,
-  Space,
+  Divider,
 } from "antd";
 import {
   SaveOutlined,
   ReloadOutlined,
   LogoutOutlined,
+  InboxOutlined,
+  UserOutlined,
+  SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import { useKeycloak } from "@react-keycloak/web";
 import api from "../services/api";
@@ -80,8 +83,11 @@ const ReceivingForm: React.FC = () => {
     try {
       const response = await api.post("/inventory/lots", {
         material_id: values.material_id,
+        manufacturer_name: values.manufacturer_name,
         quantity_received: values.quantity_received,
+        unit_of_measure: values.unit_of_measure,
         expiry_date: values.expiry_date.format("YYYY-MM-DD"),
+        po_number: values.po_number,
         supplier: values.supplier,
         manufacturer_lot: values.manufacturer_lot,
         storage_location: values.storage_location,
@@ -97,7 +103,7 @@ const ReceivingForm: React.FC = () => {
         error.response?.data?.message ||
         error.response?.data?.error ||
         "Failed to create lot";
-      message.error(`❌ ${errorMsg}`);
+      message.error(errorMsg);
       console.error("Error creating lot:", error);
     } finally {
       setLoading(false);
@@ -113,49 +119,54 @@ const ReceivingForm: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: "30px auto", padding: "0 20px" }}>
-      <Card>
-        <Space
-          style={{
-            width: "100%",
-            justifyContent: "space-between",
-            marginBottom: 16,
-          }}
-        >
-          <Title level={2} style={{ margin: 0 }}>
-            📦 Receiving Inventory
-          </Title>
-          <Button
-            type="primary"
-            danger
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
+    <div className="receiving-page">
+      <div className="receiving-shell">
+        <Card className="receiving-card">
+          <div className="receiving-header">
+            <div>
+              <Title level={2} className="receiving-title">
+                <InboxOutlined style={{ marginRight: 10 }} />
+                Receiving Inventory
+              </Title>
+              <Text className="receiving-subtitle">
+                Register incoming lots and capture audit trail details.
+              </Text>
+            </div>
+            <Button
+              type="primary"
+              ghost
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+            >
+              Sign out
+            </Button>
+          </div>
+
+          <div className="profile-card">
+            <div>
+              <Text className="section-title">Session</Text>
+              <div className="profile-meta">
+                <span className="meta-pill">
+                  <UserOutlined />
+                  {username}
+                </span>
+                <span className="meta-pill">
+                  <SafetyCertificateOutlined />
+                  {displayRoles || "None"}
+                </span>
+              </div>
+            </div>
+            <Text type="secondary">Authenticated via Keycloak</Text>
+          </div>
+
+          <Divider style={{ margin: "8px 0 24px" }} />
+
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            autoComplete="off"
           >
-            Logout
-          </Button>
-        </Space>
-
-        <div
-          style={{
-            marginBottom: 24,
-            padding: 12,
-            background: "#f0f2f5",
-            borderRadius: 4,
-          }}
-        >
-          <Text strong>👤 User: </Text>
-          <Text>{username}</Text>
-          <br />
-          <Text strong>🎭 Roles: </Text>
-          <Text>{displayRoles || "None"}</Text>
-        </div>
-
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          autoComplete="off"
-        >
           <Form.Item
             label="Material"
             name="material_id"
@@ -176,6 +187,14 @@ const ReceivingForm: React.FC = () => {
                 label: `${m.material_name} (${m.material_id})`,
               }))}
             />
+          </Form.Item>
+
+          <Form.Item
+            label="Manufacturer Name"
+            name="manufacturer_name"
+            rules={[{ required: true, message: "Please enter manufacturer" }]}
+          >
+            <Input placeholder="e.g. Acme Pharma" />
           </Form.Item>
 
           <Form.Item
@@ -200,17 +219,34 @@ const ReceivingForm: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label="Expiry Date"
+            label="Unit of Measure"
+            name="unit_of_measure"
+            rules={[{ required: true, message: "Select unit" }]}
+          >
+            <Select
+              placeholder="Select unit"
+              options={[
+                { value: "kg", label: "kg" },
+                { value: "g", label: "g" },
+                { value: "L", label: "L" },
+                { value: "mL", label: "mL" },
+                { value: "each", label: "each" },
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Expiration Date"
             name="expiry_date"
             rules={[{ required: true, message: "Please select expiry date" }]}
           >
             <DatePicker
               style={{ width: "100%" }}
               format="YYYY-MM-DD"
-              disabledDate={(current) => {
-                // Disable dates before today
-                return current && current < dayjs().startOf("day");
-              }}
+                disabledDate={(current) => {
+                  // Disable dates before today
+                  return current && current < dayjs().startOf("day");
+                }}
             />
           </Form.Item>
 
@@ -218,44 +254,49 @@ const ReceivingForm: React.FC = () => {
             <Input placeholder="Supplier name" />
           </Form.Item>
 
-          <Form.Item label="Manufacturer Lot Number" name="manufacturer_lot">
-            <Input placeholder="Manufacturer's lot number" />
-          </Form.Item>
+            <Form.Item label="Manufacturer Lot Number" name="manufacturer_lot">
+              <Input placeholder="Manufacturer's lot number" />
+            </Form.Item>
 
           <Form.Item label="Storage Location" name="storage_location">
             <Input placeholder="e.g. COLD-A-01, ROOM-B-05" />
+          </Form.Item>
+
+          <Form.Item label="PO Number" name="po_number">
+            <Input placeholder="e.g. PO-12345" />
           </Form.Item>
 
           <Form.Item label="Notes" name="notes">
             <TextArea rows={3} placeholder="Additional notes or observations" />
           </Form.Item>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              icon={<SaveOutlined />}
-              size="large"
-              block
-            >
-              Create Lot
-            </Button>
-          </Form.Item>
+            <Form.Item>
+              <div className="form-actions">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  icon={<SaveOutlined />}
+                  size="large"
+                  block
+                >
+                  Create Lot
+                </Button>
 
-          <Form.Item>
-            <Button
-              htmlType="button"
-              onClick={handleReset}
-              icon={<ReloadOutlined />}
-              size="large"
-              block
-            >
-              Reset Form
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+                <Button
+                  htmlType="button"
+                  onClick={handleReset}
+                  icon={<ReloadOutlined />}
+                  size="large"
+                  block
+                >
+                  Reset Form
+                </Button>
+              </div>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useKeycloak } from "@react-keycloak/web";
 import { Navigate } from "react-router-dom";
-import { Spin, Button } from "antd";
-import { LogoutOutlined } from "@ant-design/icons";
+import { Spin, Button, Result } from "antd";
+import { LogoutOutlined, StopOutlined } from "@ant-design/icons";
 import React from "react";
 
 interface ProtectedRouteProps {
@@ -44,49 +44,45 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
 
     if (!hasRequiredRole) {
       return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            padding: "20px",
-            textAlign: "center",
-          }}
-        >
-          <h1 style={{ fontSize: "48px", marginBottom: "20px" }}>🚫</h1>
-          <h2>Access Denied</h2>
-          <p>You don't have permission to view this page.</p>
-          <p style={{ marginTop: "10px", color: "#999" }}>
-            <strong>Required roles:</strong> {roles.join(", ")}
-          </p>
-          <p style={{ color: "#999" }}>
-            <strong>Your roles:</strong>{" "}
-            {userRoles
-              .filter((r) =>
-                [
-                  "admin",
-                  "inventory_manager",
-                  "quality_control",
-                  "production",
-                  "viewer",
-                ].includes(r),
-              )
-              .join(", ") || "None"}
-          </p>
-          <Button
-            type="primary"
-            danger
-            size="large"
-            icon={<LogoutOutlined />}
-            onClick={() =>
-              keycloak.logout({ redirectUri: window.location.origin })
-            }
-            style={{ marginTop: "30px" }}
-          >
-            Logout
-          </Button>
+        <div className="access-denied">
+          <Result
+            status="403"
+            title="Access denied"
+            subTitle="You don't have permission to view this page."
+            icon={<StopOutlined />}
+            extra={[
+              <div key="roles" className="access-denied__meta">
+                <div>
+                  <strong>Required roles:</strong> {roles.join(", ")}
+                </div>
+                <div>
+                  <strong>Your roles:</strong>{" "}
+                  {userRoles
+                    .filter((r) =>
+                      [
+                        "admin",
+                        "inventory_manager",
+                        "quality_control",
+                        "production",
+                        "viewer",
+                      ].includes(r),
+                    )
+                    .join(", ") || "None"}
+                </div>
+              </div>,
+              <Button
+                key="logout"
+                type="primary"
+                size="large"
+                icon={<LogoutOutlined />}
+                onClick={() =>
+                  keycloak.logout({ redirectUri: window.location.origin })
+                }
+              >
+                Sign out
+              </Button>,
+            ]}
+          />
         </div>
       );
     }

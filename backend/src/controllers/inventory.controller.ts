@@ -10,8 +10,12 @@ import sequelize from "../config/database";
  */
 const createLotSchema = Joi.object({
   material_id: Joi.string().max(20).required(),
+  manufacturer_name: Joi.string().max(100).required(),
   quantity_received: Joi.number().positive().required(),
+  unit_of_measure: Joi.string().max(10).required(),
   expiry_date: Joi.date().iso().required(),
+  is_sample: Joi.boolean().optional(),
+  po_number: Joi.string().max(30).optional(),
   supplier: Joi.string().max(100).optional(),
   manufacturer_lot: Joi.string().max(50).optional(),
   storage_location: Joi.string().max(50).optional(),
@@ -120,8 +124,12 @@ export const createLot = async (req: Request, res: Response) => {
 
     const {
       material_id,
+      manufacturer_name,
       quantity_received,
+      unit_of_measure,
       expiry_date,
+      is_sample,
+      po_number,
       supplier,
       manufacturer_lot,
       storage_location,
@@ -156,16 +164,20 @@ export const createLot = async (req: Request, res: Response) => {
         {
           lot_number,
           material_id,
+          manufacturer_name,
           quantity_received,
           quantity_available: quantity_received, // Initially same as received
           lot_status: "Quarantine", // Default status
+          unit_of_measure,
           supplier,
           manufacturer_lot,
           expiry_date,
+          received_date: new Date(),
           storage_location,
+          is_sample: is_sample ?? false,
+          po_number,
           notes,
           created_by: req.user?.username,
-          received_date: new Date(),
         },
         { transaction: t },
       );

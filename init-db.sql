@@ -71,6 +71,7 @@ ON CONFLICT (material_id) DO NOTHING;
 CREATE TABLE IF NOT EXISTS "InventoryLots" (
     lot_number VARCHAR(20) PRIMARY KEY,
     material_id VARCHAR(20) NOT NULL REFERENCES "Materials"(material_id),
+    manufacturer_name VARCHAR(100) NOT NULL,
     quantity_received DECIMAL(10, 3) NOT NULL CHECK (quantity_received > 0),
     quantity_available DECIMAL(10, 3) NOT NULL DEFAULT 0 CHECK (quantity_available >= 0),
     lot_status VARCHAR(20) NOT NULL DEFAULT 'Quarantine' CHECK (
@@ -80,7 +81,10 @@ CREATE TABLE IF NOT EXISTS "InventoryLots" (
     manufacturer_lot VARCHAR(50),
     expiry_date DATE NOT NULL,
     received_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    unit_of_measure VARCHAR(10) NOT NULL,
     storage_location VARCHAR(50),
+    is_sample BOOLEAN DEFAULT FALSE,
+    po_number VARCHAR(30),
     notes TEXT,
     created_by VARCHAR(50),
     modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -93,13 +97,14 @@ CREATE INDEX idx_inventory_lots_expiry ON "InventoryLots"(expiry_date);
 
 -- Insert sample lots
 INSERT INTO "InventoryLots" (
-    lot_number, material_id, quantity_received, quantity_available, 
-    lot_status, supplier, manufacturer_lot, expiry_date, storage_location
+    lot_number, material_id, manufacturer_name, quantity_received, quantity_available, 
+    lot_status, supplier, manufacturer_lot, expiry_date,
+    received_date, unit_of_measure, storage_location, is_sample, po_number
 )
 VALUES 
-    ('LOT-20260115-1001', 'MAT-001', 500.000, 500.000, 'Quarantine', 'Supplier A', 'MFG-VD3-2026-01', '2027-01-15', 'COLD-A-01'),
-    ('LOT-20260120-2001', 'MAT-002', 1000.000, 1000.000, 'Approved', 'Supplier B', 'MFG-CAC-2026-01', '2028-01-20', 'ROOM-B-05'),
-    ('LOT-20260125-3001', 'MAT-003', 250.000, 250.000, 'Approved', 'Supplier C', 'MFG-MGS-2026-01', '2027-12-31', 'ROOM-C-02')
+    ('LOT-20260115-1001', 'MAT-001', 'Acme Pharma', 500.000, 500.000, 'Quarantine', 'Supplier A', 'MFG-VD3-2026-01', '2027-01-15', '2026-01-15', 'kg', 'COLD-A-01', FALSE, 'PO-10001'),
+    ('LOT-20260120-2001', 'MAT-002', 'BioLabs', 1000.000, 1000.000, 'Approved', 'Supplier B', 'MFG-CAC-2026-01', '2028-01-20', '2026-01-20', 'kg', 'ROOM-B-05', FALSE, 'PO-10002'),
+    ('LOT-20260125-3001', 'MAT-003', 'ChemCore', 250.000, 250.000, 'Approved', 'Supplier C', 'MFG-MGS-2026-01', '2027-12-31', '2026-01-25', 'kg', 'ROOM-C-02', FALSE, 'PO-10003')
 ON CONFLICT (lot_number) DO NOTHING;
 
 -- -----------------------------------------------------------------------------

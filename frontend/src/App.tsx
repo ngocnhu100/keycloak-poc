@@ -15,7 +15,9 @@ const App: React.FC = () => {
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: "#1890ff",
+          colorPrimary: "#0f766e",
+          fontFamily: '"Space Grotesk", "IBM Plex Sans", sans-serif',
+          borderRadius: 10,
         },
       }}
     >
@@ -27,8 +29,8 @@ const App: React.FC = () => {
         }}
         onTokens={(tokens) => {
           console.log("Tokens received:", {
-            token: tokens.token ? "✅ Present" : "❌ Missing",
-            refreshToken: tokens.refreshToken ? "✅ Present" : "❌ Missing",
+            token: tokens.token ? "Present" : "Missing",
+            refreshToken: tokens.refreshToken ? "Present" : "Missing",
           });
         }}
       >

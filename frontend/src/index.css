@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
 * {
   margin: 0;
   padding: 0;
@@ -5,12 +7,11 @@
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f0f2f5;
+  background-color: #eef2f6;
+  color: #0f172a;
 }
 
 code {
@@ -20,4 +21,144 @@ code {
 
 #root {
   min-height: 100vh;
+}
+
+.receiving-page {
+  min-height: 100vh;
+  padding: 48px 20px 64px;
+  background:
+    radial-gradient(
+      1200px 600px at 20% -10%,
+      rgba(14, 116, 144, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 100% 0%,
+      rgba(15, 118, 110, 0.18),
+      transparent 55%
+    ),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f6 45%, #e2e8f0 100%);
+}
+
+.receiving-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  display: grid;
+  gap: 20px;
+}
+
+.receiving-card {
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+}
+
+.receiving-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.receiving-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.receiving-subtitle {
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.profile-card {
+  margin: 20px 0 28px;
+  padding: 16px;
+  border-radius: 12px;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(241, 245, 249, 0.9)
+  );
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.profile-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.section-title {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.form-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.ant-card-body {
+  padding: 28px;
+}
+
+.access-denied {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.access-denied .ant-result-icon {
+  margin-bottom: 8px;
+}
+
+.access-denied__meta {
+  color: #64748b;
+  display: grid;
+  gap: 4px;
+}
+
+.access-denied .ant-result-extra {
+  margin-top: 16px;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+}
+
+@media (max-width: 640px) {
+  .receiving-page {
+    padding: 32px 16px 48px;
+  }
+
+  .ant-card-body {
+    padding: 22px;
+  }
 }

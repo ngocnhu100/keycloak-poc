@@ -5,6 +5,7 @@ import { Material } from "./Material";
 interface InventoryLotAttributes {
   lot_number: string;
   material_id: string;
+  manufacturer_name: string;
   quantity_received: number;
   quantity_available: number;
   lot_status: string;
@@ -12,7 +13,10 @@ interface InventoryLotAttributes {
   manufacturer_lot?: string;
   expiry_date: Date;
   received_date?: Date;
+  unit_of_measure: string;
   storage_location?: string;
+  is_sample?: boolean;
+  po_number?: string;
   notes?: string;
   created_by?: string;
   modified_date?: Date;
@@ -33,6 +37,7 @@ export class InventoryLot
 {
   public lot_number!: string;
   public material_id!: string;
+  public manufacturer_name!: string;
   public quantity_received!: number;
   public quantity_available!: number;
   public lot_status!: string;
@@ -40,7 +45,10 @@ export class InventoryLot
   public manufacturer_lot?: string;
   public expiry_date!: Date;
   public received_date!: Date;
+  public unit_of_measure!: string;
   public storage_location?: string;
+  public is_sample?: boolean;
+  public po_number?: string;
   public notes?: string;
   public created_by?: string;
   public modified_date!: Date;
@@ -60,6 +68,10 @@ InventoryLot.init(
         model: "Materials",
         key: "material_id",
       },
+    },
+    manufacturer_name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     quantity_received: {
       type: DataTypes.DECIMAL(10, 3),
@@ -100,8 +112,20 @@ InventoryLot.init(
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    unit_of_measure: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+    },
     storage_location: {
       type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    is_sample: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    po_number: {
+      type: DataTypes.STRING(30),
       allowNull: true,
     },
     notes: {
